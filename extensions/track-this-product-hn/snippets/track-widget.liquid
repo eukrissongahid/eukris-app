@@ -1,0 +1,73 @@
+<div class="w-full flex justify-center">
+  <button class="open-track-widget bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full cursor-pointer">
+    Track This Product
+  </button>
+</div>
+
+<div id="track-widget-template" class="hidden">
+  <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+      <h2 class="text-xl font-bold">Track This Product</h2>
+      <form id="track-form" class="space-y-2">
+        <label class="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="trackInStock"
+            class="w-6 h-6 mr-2 cursor-pointer"
+          >
+          Back in Stock
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" name="trackOnSale" class="w-6 h-6 mr-2 cursor-pointer"> On Sale
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" name="trackBelowThreshold" class="w-6 h-6 mr-2 ">
+          Price below:
+          <input
+            type="number"
+            name="saleThreshold"
+            class="ml-2 border border-gray-400 rounded p-1 w-20 focus:outline-none focus:ring-0"
+          >
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" name="trackLowStock" class="w-6 h-6 mr-2 cursor-pointer ">
+          Low Stock Alert:
+          <input
+            type="number"
+            name="lowStockLevel"
+            class="ml-2 border border-gray-400 rounded p-1 w-20 focus:outline-none focus:ring-0"
+          >
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" name="trackNewVariant" class="w-6 h-6 mr-2"> New Variant
+        </label>
+        <input
+          type="email"
+          name="email"
+          required
+          class="w-full border border-gray-400 p-2 rounded focus:outline-none focus:ring-0"
+          value="test@gmail.com"
+          placeholder="Your email"
+        >
+        <input type="hidden" name="productId" value="{{ product.id }}">
+        <input type="hidden" name="variantId" value="{{ product.selected_or_first_available_variant.id }}">
+        {% if customer %}
+          <input type="hidden" name="userId" value="{{ customer.id }}">
+        {% else %}
+          <input type="hidden" name="userId" value="guest">
+        {% endif %}
+        <div class="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            class="cancel-track-widget bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded cursor-pointer">
+            Track
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
