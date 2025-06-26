@@ -16,6 +16,7 @@ export async function getProductById(client: GraphqlClient, productId: string) {
           product(id: $id) {
             id
             title
+            handle
             variants(first: 100) {
               edges {
                 node {
@@ -24,6 +25,9 @@ export async function getProductById(client: GraphqlClient, productId: string) {
                   price
                   compareAtPrice
                   inventoryQuantity
+                  image {
+                    url
+                  }
                 }
               }
             }

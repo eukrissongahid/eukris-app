@@ -1,6 +1,9 @@
 import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
-import { createOrUpdateTrackedProduct, getTrackedProduct } from "../models/trackedProduct.server";
+import {
+  createOrUpdateTrackedProduct,
+  getTrackedProduct,
+} from "../models/trackedProduct.server";
 import { getAdminGraphqlClient } from "../utils/shopify-admin";
 import { getProductById } from "../shopify/graphql/product";
 
@@ -12,14 +15,14 @@ export const loader = async ({ request }: { request: Request }) => {
 
   const url = new URL(request.url);
   const userId = url.searchParams.get("userId") ?? "guest";
-  console.log("✅ ✅ ✅ userId: ", userId);
   const productId = url.searchParams.get("productId");
-  console.log("✅ ✅ ✅ productId: ", productId);
   const variantId = url.searchParams.get("variantId");
-  console.log("✅ ✅ ✅ variantId: ", variantId);
 
   if (!productId || !variantId) {
-    return json({ success: false, message: "Missing productId or variantId" }, { status: 400 });
+    return json(
+      { success: false, message: "Missing productId or variantId" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -30,8 +33,10 @@ export const loader = async ({ request }: { request: Request }) => {
       tracker,
     });
   } catch (error) {
-    console.error("❌ Failed to fetch tracker:", error);
-    return json({ success: false, message: "Failed to fetch tracker" }, { status: 500 });
+    return json(
+      { success: false, message: "Failed to fetch tracker" },
+      { status: 500 },
+    );
   }
 };
 
@@ -47,42 +52,55 @@ export const action = async ({ request }: { request: Request }) => {
     const body = await request.json();
 
     console.log("✅ ✅ ✅ proxy body: ", JSON.stringify(body, null, 2));
+    console.log("✅ ✅ ✅ shop : ", shop);
 
     const graphqlClient = await getAdminGraphqlClient(shop);
     const product = await getProductById(graphqlClient, body.productId);
 
     function getVariantById(product: any, variantId: string) {
       if (!product?.variants?.edges) return undefined;
-      return product.variants.edges.find(
-        (edge: any) => edge.node.id === variantId
-      )?.node;
+
+      const normalizedId = variantId.replace(
+        /^gid:\/\/shopify\/ProductVariant\//,
+        "",
+      );
+
+      return product.variants.edges.find((edge: any) => {
+        const edgeId = edge.node.id.replace(
+          /^gid:\/\/shopify\/ProductVariant\//,
+          "",
+        );
+        return edgeId === normalizedId;
+      })?.node;
     }
 
     const variant = getVariantById(product, body.variantId);
+    console.log("✅ ✅ ✅ product: ", JSON.stringify(product, null, 2));
+    console.log("✅ ✅ ✅ variant: ", JSON.stringify(variant, null, 2));
 
     await createOrUpdateTrackedProduct({
       email: body.email,
       shop,
-      userId: body.userId || "guest",
+      userId: body.userId,
       productId: body.productId,
       variantId: body.variantId,
       trackInStock: body.trackInStock === "on",
       trackOnSale: body.trackOnSale === "on",
-      saleThreshold: body.saleThreshold
-        ? parseFloat(body.saleThreshold)
-        : undefined,
+      trackBelowThreshold: body.trackBelowThreshold === "on",
+      saleThreshold: body.saleThreshold ? parseFloat(body.saleThreshold) : 0,
       trackLowStock: body.trackLowStock === "on",
-      lowStockLevel: body.lowStockLevel
-        ? parseInt(body.lowStockLevel)
-        : undefined,
+      lowStockLevel: body.lowStockLevel ? parseInt(body.lowStockLevel) : 0,
       trackNewVariant: body.trackNewVariant === "on",
-      lastKnownPrice: variant?.price
-        ? parseFloat(variant.price) : 0,
+      lastKnownPrice: variant?.price ? parseFloat(variant.price) : 0,
       lastKnownCompareAtPrice: variant?.compareAtPrice
-        ? parseFloat(variant.compareAtPrice) : 0,
+        ? parseFloat(variant.compareAtPrice)
+        : 0,
       lastKnownVariantCount: product?.variants?.edges.length || 0,
       lastInventory: variant?.inventoryQuantity
-        ? parseInt(variant.inventoryQuantity) : 0,
+        ? parseInt(variant.inventoryQuantity)
+        : 0,
+      productInfo: `${product?.title || ""} ${variant?.title || ""}`.trim(),
+      variantImageUrl: variant?.image?.url || "",
     });
 
     return json({
@@ -92,7 +110,7 @@ export const action = async ({ request }: { request: Request }) => {
       variantInfo: variant,
     });
   } catch (error) {
-    console.error("App Proxy Error:", error);
+    console.log("❌ Failed to create or update tracked product:", error);
     return json(
       { success: false, message: "Failed to save tracking." },
       { status: 500 },

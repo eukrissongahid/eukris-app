@@ -8,8 +8,18 @@ import {
   updateLastKnownVariantCount,
 } from '../models/trackedProduct.server';
 
+import {
+  buildBackInStockEmailBody,
+  buildOnSaleEmailBody,
+  buildPriceThresholdEmailBody,
+  buildLowStockEmailBody,
+  buildNewVariantEmailBody,
+} from "../utils/emailTemplates.server";
+
 import { authenticate } from '../shopify.server';
 import { sendEmail } from '../utils/email.server';
+import { getProductById } from "../shopify/graphql/product";
+import { getAdminGraphqlClient } from "../utils/shopify-admin";
 
 export const action: ActionFunction = async ({request}) => {
   const {topic, shop, session, payload} = await authenticate.webhook(request);
@@ -40,46 +50,50 @@ export const action: ActionFunction = async ({request}) => {
 async function handleProductsUpdate(payload: any) {
   const { id: productId, variants } = payload;
   console.log("✅ ✅ ✅ webhook payload: ", JSON.stringify(payload, null, 2));
+  let product;
+  try {
+    const graphqlClient = await getAdminGraphqlClient(payload.shop);
+    product = await getProductById(graphqlClient, productId);
+  } catch (error) {
+    console.log("❌ Error fetching product by ID:", error);
+    return;
+  }
+
   for (const variant of variants) {
     const { id: variantId, price, compare_at_price } = variant;
     const trackers = await getTrackersByVariant(String(variantId));
+    const variantName = variant.title || "this product";
+    const options = variant.option_values
+      ? variant.option_values.map((opt: any) => `${opt.name}: ${opt.value}`).join(", ")
+      : "";
+    const description = options ? `${variantName} (${options})` : variantName;
 
     for (const tracker of trackers) {
       if (tracker.trackInStock && variant.inventory_quantity > 0 && (tracker.lastInventory ?? 0) <= 0) {
-        const variantName = variant.title || "this product";
-        const options = variant.option_values
-          ? variant.option_values.map((opt: any) => `${opt.name}: ${opt.value}`).join(", ")
-          : "";
-        const description = options ? `${variantName} (${options})` : variantName;
-        const message = `✅ Good news! "${description}" is now in stock with ${variant.inventory_quantity} available.`;
         await sendEmail({
           to: tracker.email,
-          subject: '📦 Back in Stock Notification',
-          html: `<p>${message}</p>`,
+          subject: `📦 Back in Stock - ${tracker.shop} | ${tracker.productInfo}`,
+          html: buildBackInStockEmailBody(tracker, description, variant.inventory_quantity, product.handle),
         });
 
       }
 
       if (tracker.trackOnSale && tracker.lastKnownPrice != price && tracker.lastKnownPrice != compare_at_price) {
-        const variantName = variant.title || "this product";
-        const options = variant.option_values
-          ? variant.option_values.map((opt: any) => `${opt.name}: ${opt.value}`).join(", ")
-          : "";
-        const description = options ? `${variantName} (${options})` : variantName;
-
-        if (tracker.saleThreshold && parseFloat(price) <= tracker.saleThreshold) {
-          const message = `✅ Price dropped below threshold for "${description}": ${price} <= ${tracker.saleThreshold}`;
+        if (compare_at_price && parseFloat(compare_at_price) > parseFloat(price)) {
           await sendEmail({
             to: tracker.email,
-            subject: '💸 Price Drop Alert',
-            html: `<p>${message}</p>`,
+            subject: `🎉 On Sale - ${tracker.shop} | ${tracker.productInfo}`,
+            html: buildOnSaleEmailBody(tracker, description, price, compare_at_price, product.handle),
           });
-        } else if (compare_at_price && parseFloat(compare_at_price) > parseFloat(price)) {
-          const message = `✅ Sale detected for "${description}": ${price} < ${compare_at_price}`;
+        }
+      }
+
+      if (tracker.trackBelowThreshold && tracker.saleThreshold != null) {
+        if (tracker.saleThreshold && parseFloat(price) <= tracker.saleThreshold) {
           await sendEmail({
             to: tracker.email,
-            subject: '🎉 Product On Sale',
-            html: `<p>${message}</p>`,
+            subject: `💸 Price Dropped Below Threshold - ${tracker.shop} | ${tracker.productInfo}`,
+            html: buildPriceThresholdEmailBody(tracker, description, price, product.handle),
           });
         }
       }
@@ -87,14 +101,11 @@ async function handleProductsUpdate(payload: any) {
       if (tracker.trackNewVariant) {
         const lastKnownVariantCount = tracker?.lastKnownVariantCount || 0;
         const currentVariantCount = payload.variants?.length || 0;
-
         if (currentVariantCount > lastKnownVariantCount) {
-          const message = `🆕 New variant(s) added for product ${productId}. Previous: ${lastKnownVariantCount}, Now: ${currentVariantCount}`
-
           await sendEmail({
             to: tracker.email,
-            subject: '🆕 New Variant Released',
-            html: `<p>${message}</p>`,
+            subject: `🆕 New Variant Added - ${tracker.shop} | ${tracker.productInfo}`,
+            html: buildNewVariantEmailBody(tracker, lastKnownVariantCount, currentVariantCount, product.handle),
           });
         }
       }
@@ -102,18 +113,10 @@ async function handleProductsUpdate(payload: any) {
       if (tracker.trackLowStock && tracker.lowStockLevel != null) {
         const available = variant.inventory_quantity;
         if (available < tracker.lowStockLevel) {
-          const variantName = variant.title || "this product";
-          const options = variant.option_values
-            ? variant.option_values.map((opt: any) => `${opt.name}: ${opt.value}`).join(", ")
-            : "";
-          const description = options ? `${variantName} (${options})` : variantName;
-
-          const message = `⚠️ Low stock alert for "${description}": Only ${available} left (Threshold: ${tracker.lowStockLevel})`;
-
           await sendEmail({
             to: tracker.email,
-            subject: '⚠️ Low Stock Warning',
-            html: `<p>${message}</p>`,
+            subject: `⚠️ Low Stock Warning - ${tracker.shop} | ${tracker.productInfo}`,
+            html: buildLowStockEmailBody(tracker, description, available, product.handle),
           });
         }
       }

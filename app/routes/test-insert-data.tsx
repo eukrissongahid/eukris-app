@@ -10,10 +10,12 @@ function generateRandomData() {
   return {
     shop: "dev.myshopify.com",
     email: `user${randomNum}@example.com`,
+    userId: `user-${randomNum}`,
     productId: "10653414850863",
     variantId: "51521682243887",
     trackInStock: true,
     trackOnSale: true,
+    trackBelowThreshold: true,
     trackLowStock: true,
     trackNewVariant: true,
     saleThreshold: 200,
@@ -22,6 +24,8 @@ function generateRandomData() {
     lastKnownCompareAtPrice: 499,
     lastInventory: 0,
     lastKnownVariantCount: 0,
+    productInfo: `Test Product ${randomNum}`,
+    variantImageUrl: `https://example.com/image${randomNum}.jpg`,
   };
 }
 

@@ -1,14 +1,13 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "ea069554cc4a97b00e9d332932f7e250"
+client_id = "2af376b81b83b84498455716a53b09a7"
 name = "track-this-product-hn-x"
-handle = "track-this-product-hn-x-5"
-application_url = "https://doll-stands-study-fixtures.trycloudflare.com"
+handle = "track-this-product-hn-x-10"
+application_url = "https://spice-courtesy-madagascar-assists.trycloudflare.com"
 embedded = true
 
 [build]
 include_config_on_deploy = true
-automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-04"
@@ -18,7 +17,7 @@ api_version = "2025-04"
 scopes = "read_inventory,read_products,write_inventory,write_products"
 
 [auth]
-redirect_urls = ["https://doll-stands-study-fixtures.trycloudflare.com/auth/callback", "https://doll-stands-study-fixtures.trycloudflare.com/auth/shopify/callback", "https://doll-stands-study-fixtures.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://spice-courtesy-madagascar-assists.trycloudflare.com/auth/callback", "https://spice-courtesy-madagascar-assists.trycloudflare.com/auth/shopify/callback", "https://spice-courtesy-madagascar-assists.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false

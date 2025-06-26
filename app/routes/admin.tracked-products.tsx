@@ -1,128 +1,3 @@
-// import {
-//   Page,
-//   Card,
-//   DataTable,
-//   Text,
-//   Button,
-//   Thumbnail,
-//   Modal,
-//   List,
-// } from "@shopify/polaris";
-// import { useState } from "react";
-
-// export default function TrackedProductsPage() {
-//   const [activeProductId, setActiveProductId] = useState<string | null>(null);
-
-//   const products = [
-//     {
-//       id: "1",
-//       title: "Premium Leather Wallet",
-//       variantTitle: "Brown",
-//       sku: "WL-BRN-01",
-//       followers: 42,
-//       followerEmails: ["alice@example.com", "bob@example.com", "carla@example.com"],
-//       trackingTypes: ["Back in Stock", "Price Drop < ₱1,000"],
-//       lastActivity: "2025-06-20",
-//       image: "https://cdn.shopify.com/s/files/1/0533/2089/files/leather-wallet.jpg",
-//       storeAdminUrl: "https://yourstore.myshopify.com/admin/products/123456789",
-//     },
-//     {
-//       id: "2",
-//       title: "Eco Bamboo Toothbrush",
-//       variantTitle: "",
-//       sku: "TB-100",
-//       followers: 18,
-//       followerEmails: ["dan@example.com", "erika@example.com"],
-//       trackingTypes: ["New Variant", "Low Stock < 20"],
-//       lastActivity: "2025-06-18",
-//       image: "https://cdn.shopify.com/s/files/1/0533/2089/files/bamboo-toothbrush.jpg",
-//       storeAdminUrl: "https://yourstore.myshopify.com/admin/products/987654321",
-//     },
-//     {
-//       id: "3",
-//       title: "Wireless Earbuds",
-//       variantTitle: "Black / 128GB",
-//       sku: "EB-BLK-128",
-//       followers: 64,
-//       followerEmails: ["frank@example.com", "grace@example.com", "harry@example.com"],
-//       trackingTypes: ["Back in Stock", "On Sale"],
-//       lastActivity: "2025-06-21",
-//       image: "https://cdn.shopify.com/s/files/1/0533/2089/files/earbuds.jpg",
-//       storeAdminUrl: "https://yourstore.myshopify.com/admin/products/567890123",
-//     },
-//   ];
-
-//   const activeProduct = products.find((p) => p.id === activeProductId);
-
-//   const rows = products.map((product) => [
-//     <div key={product.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-//       <Thumbnail source={product.image} alt={product.title} />
-//       <Text variant="bodyMd" fontWeight="medium" as="span">
-//         {product.title}
-//         {product.variantTitle ? ` (${product.variantTitle})` : ""}
-//       </Text>
-//     </div>,
-//     product.sku,
-//     <div style={{ textAlign: "center" }}>{product.followers}</div>,
-//     product.trackingTypes.join(", "),
-//     <div style={{ textAlign: "center" }}>{product.lastActivity}</div>,
-//     <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-//       <Button onClick={() => setActiveProductId(product.id)}>View Followers</Button>
-//     </div>,
-//     <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-//       <Button url={product.storeAdminUrl} target="_blank" variant="primary">
-//         View in Store
-//       </Button>
-//     </div>,
-//   ]);
-
-//   return (
-//     <Page title="Tracked Products">
-//       <Card>
-//         <DataTable
-//           columnContentTypes={[
-//             "text", "text", "numeric", "text", "text", "text", "text"
-//           ]}
-//           headings={[
-//             "Product",
-//             "SKU",
-//             <div style={{ textAlign: "center" }}>Followers</div>,
-//             "Tracking Types",
-//             <div style={{ textAlign: "center" }}>Last Updated</div>,
-//             <div style={{ textAlign: "center" }}>Followers</div>,
-//             <div style={{ textAlign: "center" }}>Store Link</div>,
-//           ]}
-//           rows={rows}
-//         />
-//       </Card>
-
-//       {activeProduct && (
-//         <Modal
-//           open
-//           onClose={() => setActiveProductId(null)}
-//           title={`Followers for ${activeProduct.title}`}
-//           primaryAction={{
-//             content: "Close",
-//             onAction: () => setActiveProductId(null),
-//           }}
-//         >
-//           <Modal.Section>
-//             {activeProduct.followerEmails.length > 0 ? (
-//               <List type="bullet">
-//                 {activeProduct.followerEmails.map((email, i) => (
-//                   <List.Item key={i}>{email}</List.Item>
-//                 ))}
-//               </List>
-//             ) : (
-//               <Text as="span">No followers yet.</Text>
-//             )}
-//           </Modal.Section>
-//         </Modal>
-//       )}
-//     </Page>
-//   );
-// }
-
 import {
   Page,
   Card,
@@ -133,53 +8,121 @@ import {
   Modal,
   List,
 } from "@shopify/polaris";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getTrackedProductsByShop } from "../models/trackedProduct.server";
 
-export default function TrackedProductsPage() {
-  const [activeProductId, setActiveProductId] = useState<string | null>(null);
+type ShopProduct = Omit<
+  Awaited<ReturnType<typeof getTrackedProductsByShop>>[number],
+  "createdAt"
+> & {
+  createdAt: string;
+};
 
-  // Generate dummy data
-  const generateEmails = (count: number) =>
-    Array.from({ length: count }, (_, i) => `user${i + 1}@example.com`);
+type Props = {
+  shopProducts: ShopProduct[];
+};
 
-  const generateProducts = (count: number) =>
-    Array.from({ length: count }, (_, i) => {
-      const id = (i + 1).toString();
-      return {
-        id,
-        title: `Product ${i + 1}`,
-        variantTitle: i % 2 === 0 ? `Variant ${i + 1}` : "",
-        sku: `SKU-${i + 1}`,
-        followers: 20,
-        followerEmails: generateEmails(20),
-        trackingTypes: ["Back in Stock", "Low Stock", "Price Drop"],
-        lastActivity: "2025-06-24",
-        image: "https://cdn.shopify.com/s/files/1/0533/2089/files/earbuds.jpg",
-        storeAdminUrl: `https://yourstore.myshopify.com/admin/products/00000${i + 1}`,
-      };
-    });
+type GroupedVariant = {
+  variantId: string;
+  productId: string;
+  productInfo: string;
+  variantImageUrl: string;
+  shop: string;
+  updatedAt: string;
+  trackingTypes: string[];
+  followerEmails: string[];
+};
 
-  const products = generateProducts(20);
-  const activeProduct = products.find((p) => p.id === activeProductId);
+export default function TrackedProductsPage({ shopProducts }: Props) {
+  const [activeVariantId, setActiveVariantId] = useState<string | null>(null);
 
-  const rows = products.map((product) => [
-    <div key={product.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-      <Thumbnail source={product.image} alt={product.title} />
+  useEffect(() => {
+    console.log("✅ Products from props:", shopProducts);
+  }, [shopProducts]);
+
+  const groupedVariants = useMemo(() => {
+    const map = new Map<string, GroupedVariant>();
+
+    for (const item of shopProducts) {
+      const {
+        variantId,
+        productId,
+        productInfo,
+        variantImageUrl,
+        updatedAt,
+        shop,
+        email,
+        trackInStock,
+        trackLowStock,
+        trackOnSale,
+        trackNewVariant,
+      } = item;
+
+      const trackingTypes = [
+        trackInStock && "Back in Stock",
+        trackLowStock && "Low Stock",
+        trackOnSale && "Price Drop",
+        trackNewVariant && "New Variant",
+      ].filter(Boolean) as string[];
+
+      if (!map.has(variantId)) {
+        map.set(variantId, {
+          variantId,
+          productId,
+          productInfo,
+          variantImageUrl,
+          shop,
+          updatedAt,
+          trackingTypes,
+          followerEmails: email ? [email] : [],
+        });
+      } else {
+        const existing = map.get(variantId)!;
+        if (email && !existing.followerEmails.includes(email)) {
+          existing.followerEmails.push(email);
+        }
+      }
+    }
+
+    return Array.from(map.values());
+  }, [shopProducts]);
+
+  const activeVariant = groupedVariants.find(
+    (v) => v.variantId === activeVariantId
+  );
+
+  const rows = groupedVariants.map((variant) => [
+    <div
+      key={variant.variantId}
+      style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+    >
+      <Thumbnail source={variant.variantImageUrl} alt={variant.productInfo} />
       <Text variant="bodyMd" fontWeight="medium" as="span">
-        {product.title}
-        {product.variantTitle ? ` (${product.variantTitle})` : ""}
+        {variant.productInfo}
       </Text>
     </div>,
-    product.sku,
-    <div style={{ textAlign: "center" }}>{product.followers}</div>,
-    product.trackingTypes.join(", "),
-    <div style={{ textAlign: "center" }}>{product.lastActivity}</div>,
-    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-      <Button onClick={() => setActiveProductId(product.id)}>View Followers</Button>
+
+    <div style={{ textAlign: "center" }}>
+      {variant.followerEmails.length}
     </div>,
+
+    variant.trackingTypes.join(", "),
+
+    new Date(variant.updatedAt).toLocaleDateString(),
+
     <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-      <Button url={product.storeAdminUrl} target="_blank" variant="primary">
-        View in Store
+      <Button onClick={() => setActiveVariantId(variant.variantId)}>
+        View Followers
+      </Button>
+    </div>,
+
+    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+      <Button
+        url={`https://${variant.shop}/admin/products/${variant.productId}/variants/${variant.variantId}`}
+        target="_blank"
+        variant="primary"
+      >
+        View in Product
       </Button>
     </div>,
   ]);
@@ -189,36 +132,39 @@ export default function TrackedProductsPage() {
       <Card>
         <DataTable
           columnContentTypes={[
-            "text", "text", "numeric", "text", "text", "text", "text"
+            "text",
+            "numeric",
+            "text",
+            "text",
+            "text",
+            "text",
           ]}
           headings={[
-            "Product",
-            "SKU",
+            "Product Variant",
             <div style={{ textAlign: "center" }}>Followers</div>,
             "Tracking Types",
             <div style={{ textAlign: "center" }}>Last Updated</div>,
             <div style={{ textAlign: "center" }}>Followers</div>,
-            <div style={{ textAlign: "center" }}>Store Link</div>,
+            <div style={{ textAlign: "center" }}>Product Link</div>,
           ]}
           rows={rows}
         />
       </Card>
 
-      {activeProduct && (
+      {activeVariant && (
         <Modal
           open
-          onClose={() => setActiveProductId(null)}
-          title={`Followers for ${activeProduct.title}`}
-          large
+          onClose={() => setActiveVariantId(null)}
+          title={`Followers for ${activeVariant.productInfo}`}
           primaryAction={{
             content: "Close",
-            onAction: () => setActiveProductId(null),
+            onAction: () => setActiveVariantId(null),
           }}
         >
           <Modal.Section>
-            {activeProduct.followerEmails.length > 0 ? (
+            {activeVariant.followerEmails.length > 0 ? (
               <List type="bullet">
-                {activeProduct.followerEmails.map((email, i) => (
+                {activeVariant.followerEmails.map((email, i) => (
                   <List.Item key={i}>{email}</List.Item>
                 ))}
               </List>

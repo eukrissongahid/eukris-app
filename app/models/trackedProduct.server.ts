@@ -5,9 +5,10 @@ export const createOrUpdateTrackedProduct = async (data: {
   shop: string;
   productId: string;
   variantId: string;
-  userId?: string;
+  userId: string;
   trackInStock?: boolean;
   trackOnSale?: boolean;
+  trackBelowThreshold?: boolean;
   saleThreshold?: number;
   trackLowStock?: boolean;
   lowStockLevel?: number;
@@ -16,51 +17,47 @@ export const createOrUpdateTrackedProduct = async (data: {
   lastKnownCompareAtPrice?: number;
   lastKnownVariantCount?: number;
   lastInventory?: number;
+  productInfo?: string;
+  variantImageUrl?: string;
 }) => {
-  const userId = data.userId ?? "guest";
+  if (!data.userId) {
+    throw new Error("User must be logged in to track a product.");
+  }
 
   const preparedData = {
     ...data,
-    userId,
     trackInStock: data.trackInStock ?? false,
     trackOnSale: data.trackOnSale ?? false,
     trackLowStock: data.trackLowStock ?? false,
     trackNewVariant: data.trackNewVariant ?? false,
   };
 
-  let existing;
-
-  if (userId === "guest") {
-    existing = await prisma.trackedProduct.findFirst({
-      where: {
-        email: data.email,
+  const existing = await prisma.trackedProduct.findUnique({
+    where: {
+      userId_productId_variantId: {
+        userId: data.userId,
         productId: data.productId,
         variantId: data.variantId,
       },
-    });
-  } else {
-    existing = await prisma.trackedProduct.findUnique({
-      where: {
-        userId_productId_variantId: {
-          userId,
-          productId: data.productId,
-          variantId: data.variantId,
-        },
-      },
-    });
-  }
+    },
+  });
 
   if (existing) {
     return prisma.trackedProduct.update({
       where: { id: existing.id },
       data: preparedData,
     });
-  } else {
-    return prisma.trackedProduct.create({ data: preparedData });
   }
+
+  return prisma.trackedProduct.create({ data: preparedData });
 };
 
-export const getTrackedProduct = async (userId: string, productId: string, variantId: string) => {
+
+export const getTrackedProduct = async (
+  userId: string,
+  productId: string,
+  variantId: string,
+) => {
   return prisma.trackedProduct.findUnique({
     where: {
       userId_productId_variantId: {
@@ -75,12 +72,6 @@ export const getTrackedProduct = async (userId: string, productId: string, varia
 export const getTrackersByVariant = (variantId: string) => {
   return prisma.trackedProduct.findMany({
     where: { variantId },
-  });
-};
-
-export const getTrackersByProduct = (productId: string) => {
-  return prisma.trackedProduct.findMany({
-    where: { productId },
   });
 };
 
@@ -105,7 +96,10 @@ export const updateLastInventory = (id: string, inventory: number) => {
   });
 };
 
-export const updateLastKnownVariantCount = (id: string, varaintCount: number) => {
+export const updateLastKnownVariantCount = (
+  id: string,
+  varaintCount: number,
+) => {
   return prisma.trackedProduct.update({
     where: { id },
     data: { lastKnownVariantCount: varaintCount },
@@ -117,8 +111,4 @@ export const getTrackedProductsByShop = (shop: string) => {
     where: { shop },
     orderBy: { createdAt: "desc" },
   });
-};
-
-export const deleteTrackedProduct = (id: string) => {
-  return prisma.trackedProduct.delete({ where: { id } });
 };
