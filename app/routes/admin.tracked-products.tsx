@@ -35,18 +35,6 @@ type Props = {
   shopProducts: ShopProduct[];
 };
 
-// type GroupedVariant = {
-//   variantId: string;
-//   productId: string;
-//   sku: string;
-//   productInfo: string;
-//   variantImageUrl: string;
-//   shop: string;
-//   updatedAt: string;
-//   trackingTypes: string[];
-//   followers: { email: string; userId: string }[];
-// };
-
 type GroupedVariant = {
   variantId: string;
   productId: string;
@@ -55,11 +43,11 @@ type GroupedVariant = {
   variantImageUrl: string;
   shop: string;
   updatedAt: string;
-  trackingTypes: string[]; // keep if you still want aggregate/global display
+  trackingTypes: string[];
   followers: {
     email: string;
     userId: string;
-    trackingTypes: string[]; // <-- added per follower
+    trackingTypes: string[];
   }[];
 };
 
@@ -87,56 +75,6 @@ export default function TrackedProductsPage({ shopProducts }: Props) {
       }
     }
   }, [fetcher]);
-
-  // const groupedVariants = useMemo(() => {
-  //   const map = new Map<string, GroupedVariant>();
-
-  //   for (const item of shopProducts) {
-  //     const {
-  //       variantId,
-  //       productId,
-  //       sku,
-  //       productInfo,
-  //       variantImageUrl,
-  //       updatedAt,
-  //       shop,
-  //       email,
-  //       userId,
-  //       trackInStock,
-  //       trackLowStock,
-  //       trackOnSale,
-  //       trackNewVariant,
-  //     } = item;
-
-  //     const trackingTypes = [
-  //       trackInStock && 'Back in Stock',
-  //       trackLowStock && 'Low Stock',
-  //       trackOnSale && 'Price Drop',
-  //       trackNewVariant && 'New Variant',
-  //     ].filter(Boolean) as string[];
-
-  //     if (!map.has(variantId)) {
-  //       map.set(variantId, {
-  //         variantId,
-  //         productId,
-  //         sku,
-  //         productInfo,
-  //         variantImageUrl,
-  //         shop,
-  //         updatedAt,
-  //         trackingTypes,
-  //         followers: email ? [{ email, userId }] : [],
-  //       });
-  //     } else {
-  //       const existing = map.get(variantId)!;
-  //       if (email && !existing.followers.find((f) => f.email === email)) {
-  //         existing.followers.push({ email, userId });
-  //       }
-  //     }
-  //   }
-
-  //   return Array.from(map.values());
-  // }, [shopProducts]);
 
   const groupedVariants = useMemo(() => {
     const map = new Map<string, GroupedVariant>();
@@ -174,7 +112,7 @@ export default function TrackedProductsPage({ shopProducts }: Props) {
           variantImageUrl,
           shop,
           updatedAt,
-          trackingTypes: [], // remove global tracking here
+          trackingTypes: [],
           followers: email ? [{ email, userId, trackingTypes: followerTrackingTypes }] : [],
         });
       } else {
@@ -233,13 +171,7 @@ export default function TrackedProductsPage({ shopProducts }: Props) {
         {rows.length > 0 ? (
           <DataTable
             columnContentTypes={['text', 'numeric', 'text', 'text', 'text', 'text']}
-            headings={[
-              'Product Variant',
-              'Followers',
-              'SKU',
-              // 'Last Updated',
-              '',
-            ]}
+            headings={['Product Variant', 'Followers', 'SKU', '']}
             rows={rows}
           />
         ) : (
@@ -272,12 +204,6 @@ export default function TrackedProductsPage({ shopProducts }: Props) {
                           {follower.email}
                         </Text>
                         <Box paddingBlockStart="100">
-                          {/* <Text as="p" variant="bodySm" tone="subdued">
-                            Tracking:{' '}
-                            {activeVariant.trackingTypes.length > 0
-                              ? activeVariant.trackingTypes.join(', ')
-                              : 'None'}
-                          </Text> */}
                           <Text as="p" variant="bodySm" tone="subdued">
                             Tracking:{' '}
                             {follower.trackingTypes.length > 0
@@ -288,6 +214,15 @@ export default function TrackedProductsPage({ shopProducts }: Props) {
                       </Box>
                       <Button
                         size="slim"
+                        variant="primary"
+                        tone="critical"
+                        loading={
+                          fetcher.state !== 'idle' &&
+                          fetcher.formData &&
+                          fetcher.formData.get('userId') === follower.userId &&
+                          fetcher.formData.get('productId') === activeVariant.productId &&
+                          fetcher.formData.get('variantId') === activeVariant.variantId
+                        }
                         onClick={() => {
                           const formData = new FormData();
                           formData.append('userId', follower.userId);

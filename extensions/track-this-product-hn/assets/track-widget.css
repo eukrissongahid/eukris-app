@@ -31,22 +31,46 @@ button:disabled {
 }
 
 .ttp-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
 }
 
 .ttp-open-button {
-  background-color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #2563eb;
   color: white;
   font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
+  font-size: 0.875rem;
+  padding: 0.75rem;
+  border-radius: 50%;
   cursor: pointer;
   border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+  width: 3.5rem;
+  height: 3.5rem;
 }
+
 .ttp-open-button:hover {
   background-color: #1e40af;
+  transform: translateY(-2px);
+}
+
+.ttp-open-button svg {
+  pointer-events: none;
+}
+
+.ttp-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke: currentColor;
 }
 
 .ttp-modal-overlay {

@@ -72,6 +72,15 @@ export const getTrackersByVariant = (variantId: string) => {
   });
 };
 
+export const getTrackedVariantIdsByProductId = async (productId: string) => {
+  const variants = await prisma.trackedProduct.findMany({
+    where: { productId },
+    select: { variantId: true },
+  });
+
+  return variants.map((v) => v.variantId);
+};
+
 export const updateLastKnownPrice = (id: string, price: number) => {
   return prisma.trackedProduct.update({
     where: { id },
@@ -119,6 +128,29 @@ export const deleteTrackedProduct = async (
         productId,
         variantId,
       },
+    },
+  });
+};
+
+export const deleteTrackedByProductId = async (productId: string) => {
+  return prisma.trackedProduct.deleteMany({
+    where: { productId },
+  });
+};
+
+export const deleteTrackedByVariantIds = async (variantIds: string[]) => {
+  return prisma.trackedProduct.deleteMany({
+    where: {
+      variantId: { in: variantIds },
+    },
+  });
+};
+
+export const getGroupedTrackNewVariantTrackers = async (productId: string) => {
+  return prisma.trackedProduct.findMany({
+    where: {
+      productId,
+      trackNewVariant: true,
     },
   });
 };

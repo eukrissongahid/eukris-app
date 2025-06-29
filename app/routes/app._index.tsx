@@ -29,9 +29,5 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Index() {
   const { shopProducts } = useLoaderData<typeof loader>();
-  const shopProductsWithSku = shopProducts.map((product: any) => ({
-    sku: product.sku ?? '',
-    ...product,
-  }));
-  return <TrackedProductsPage shopProducts={shopProductsWithSku} />;
+  return <TrackedProductsPage shopProducts={shopProducts} />;
 }

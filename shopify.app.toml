@@ -1,14 +1,13 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "a4a984be3841b3aa266f4c8e9cb8cceb"
-name = "track-this-product-hn-x"
-handle = "track-this-product-hn-x-19"
-application_url = "https://upgrades-annual-boats-award.trycloudflare.com"
+client_id = "70c900bcc596cfc7748ac9f40b3fc5c9"
+name = "track-this-product-hn-demo-3"
+handle = "track-this-product-hn-demo-4"
+application_url = "https://ukraine-natural-investigators-souls.trycloudflare.com"
 embedded = true
 
 [build]
 include_config_on_deploy = true
-automatically_update_urls_on_dev = true
 
 [webhooks]
 api_version = "2025-04"
@@ -18,7 +17,7 @@ api_version = "2025-04"
 scopes = "read_products,write_products"
 
 [auth]
-redirect_urls = ["https://upgrades-annual-boats-award.trycloudflare.com/auth/callback", "https://upgrades-annual-boats-award.trycloudflare.com/auth/shopify/callback", "https://upgrades-annual-boats-award.trycloudflare.com/api/auth/callback"]
+redirect_urls = ["https://ukraine-natural-investigators-souls.trycloudflare.com/auth/callback", "https://ukraine-natural-investigators-souls.trycloudflare.com/auth/shopify/callback", "https://ukraine-natural-investigators-souls.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false
