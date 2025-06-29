@@ -1,4 +1,4 @@
-import {ActionFunction} from '@remix-run/node';
+import { ActionFunction } from '@remix-run/node';
 
 import {
   getTrackersByVariant,
@@ -14,34 +14,24 @@ import {
   buildPriceThresholdEmailBody,
   buildLowStockEmailBody,
   buildNewVariantEmailBody,
-} from "../utils/emailTemplates.server";
+} from '../utils/emailTemplates.server';
 
 import { authenticate } from '../shopify.server';
-import { sendEmail } from '../utils/email.server';
-import { getProductById } from "../shopify/graphql/product";
-import { getAdminGraphqlClient } from "../utils/shopify-admin";
+import { sendEmail } from '../utils/emailClient.server';
+import { getProductById } from '../shopify/graphql/product';
+import { getAdminGraphqlClient } from '../utils/shopify-admin';
 
-export const action: ActionFunction = async ({request}) => {
-  const {topic, shop, session, payload} = await authenticate.webhook(request);
+export const action: ActionFunction = async ({ request }) => {
+  const { topic, shop, session, payload } = await authenticate.webhook(request);
 
   switch (topic) {
-    case 'APP_UNINSTALLED':
-      if (session) {
-        console.log("✅ this is called uninstalled!");
-      }
     case 'PRODUCTS_UPDATE':
       if (session) {
         handleProductsUpdate(payload);
-        console.log("✅ this is called products update! --> ", JSON.stringify(payload, null, 2));
-      }
-      break;
-    case 'INVENTORY_LEVELS_UPDATE':
-      if (session) {
-        console.log("✅ this is called inventory update! --> ", JSON.stringify(payload, null, 2));
       }
       break;
     default:
-      throw new Response('Unhandled webhook topic', {status: 404});
+      throw new Response('Unhandled webhook topic', { status: 404 });
   }
 
   throw new Response();
@@ -49,41 +39,58 @@ export const action: ActionFunction = async ({request}) => {
 
 async function handleProductsUpdate(payload: any) {
   const { id: productId, variants } = payload;
-  console.log("✅ ✅ ✅ webhook payload: ", JSON.stringify(payload, null, 2));
   let product;
   try {
     const graphqlClient = await getAdminGraphqlClient(payload.shop);
     product = await getProductById(graphqlClient, productId);
   } catch (error) {
-    console.log("❌ Error fetching product by ID:", error);
+    console.log('❌ Error fetching product by ID:', error);
     return;
   }
 
   for (const variant of variants) {
     const { id: variantId, price, compare_at_price } = variant;
     const trackers = await getTrackersByVariant(String(variantId));
-    const variantName = variant.title || "this product";
+    const variantName = variant.title || 'this product';
     const options = variant.option_values
-      ? variant.option_values.map((opt: any) => `${opt.name}: ${opt.value}`).join(", ")
-      : "";
+      ? variant.option_values.map((opt: any) => `${opt.name}: ${opt.value}`).join(', ')
+      : '';
     const description = options ? `${variantName} (${options})` : variantName;
 
     for (const tracker of trackers) {
-      if (tracker.trackInStock && variant.inventory_quantity > 0 && (tracker.lastInventory ?? 0) <= 0) {
+      if (
+        tracker.trackInStock &&
+        variant.inventory_quantity > 0 &&
+        (tracker.lastInventory ?? 0) <= 0
+      ) {
         await sendEmail({
           to: tracker.email,
           subject: `📦 Back in Stock - ${tracker.shop} | ${tracker.productInfo}`,
-          html: buildBackInStockEmailBody(tracker, description, variant.inventory_quantity, product.handle),
+          html: buildBackInStockEmailBody(
+            tracker,
+            description,
+            variant.inventory_quantity,
+            product.handle,
+          ),
         });
-
       }
 
-      if (tracker.trackOnSale && tracker.lastKnownPrice != price && tracker.lastKnownPrice != compare_at_price) {
+      if (
+        tracker.trackOnSale &&
+        tracker.lastKnownPrice != price &&
+        tracker.lastKnownPrice != compare_at_price
+      ) {
         if (compare_at_price && parseFloat(compare_at_price) > parseFloat(price)) {
           await sendEmail({
             to: tracker.email,
             subject: `🎉 On Sale - ${tracker.shop} | ${tracker.productInfo}`,
-            html: buildOnSaleEmailBody(tracker, description, price, compare_at_price, product.handle),
+            html: buildOnSaleEmailBody(
+              tracker,
+              description,
+              price,
+              compare_at_price,
+              product.handle,
+            ),
           });
         }
       }
@@ -105,7 +112,12 @@ async function handleProductsUpdate(payload: any) {
           await sendEmail({
             to: tracker.email,
             subject: `🆕 New Variant Added - ${tracker.shop} | ${tracker.productInfo}`,
-            html: buildNewVariantEmailBody(tracker, lastKnownVariantCount, currentVariantCount, product.handle),
+            html: buildNewVariantEmailBody(
+              tracker,
+              lastKnownVariantCount,
+              currentVariantCount,
+              product.handle,
+            ),
           });
         }
       }

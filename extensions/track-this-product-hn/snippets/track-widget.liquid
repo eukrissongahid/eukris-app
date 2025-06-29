@@ -1,58 +1,76 @@
-<div class="ttp-container">
-  <button type="button" class="open-track-widget ttp-open-button">Track This Product</button>
+<div class='ttp-container'>
+  <button type='button' class='open-track-widget ttp-open-button'>Track This Product</button>
 </div>
 
-<div id="track-widget-template" class="ttp-hidden">
-  <div class="ttp-modal-overlay">
-    <div id="ttp-loading-spinner" class="ttp-spinner-overlay ttp-hidden">
-      <div class="ttp-spinner"></div>
+<div id='track-widget-template' class='ttp-hidden'>
+  <div class='ttp-modal-overlay'>
+    <div id='ttp-loading-spinner' class='ttp-spinner-overlay ttp-hidden'>
+      <div class='ttp-spinner'></div>
     </div>
 
-    <div class="ttp-modal-box">
-      <h2 class="ttp-modal-title">Track This Product</h2>
-      <form id="track-form" class="ttp-form">
-        <label class="ttp-checkbox-label">
-          <input type="checkbox" name="trackInStock" class="ttp-checkbox"> Back in Stock
+    <div class='ttp-modal-box'>
+      <button type='button' class='ttp-close-button' aria-label='Close Modal'>×</button>
+      <h2 class='ttp-modal-title'>Track This Product</h2>
+      <form id='track-form' class='ttp-form'>
+        <label class='ttp-checkbox-label'>
+          <input type='checkbox' name='trackInStock' class='ttp-checkbox'> Back in Stock
         </label>
 
-        <label class="ttp-checkbox-label">
-          <input type="checkbox" name="trackOnSale" class="ttp-checkbox"> On Sale
+        <label class='ttp-checkbox-label'>
+          <input type='checkbox' name='trackOnSale' class='ttp-checkbox'> On Sale
         </label>
 
-        <div class="ttp-inline-group">
-          <label class="ttp-checkbox-label">
-            <input type="checkbox" name="trackBelowThreshold" class="ttp-checkbox"> Price below:
+        <div class='ttp-inline-group'>
+          <label class='ttp-checkbox-label'>
+            <input type='checkbox' name='trackBelowThreshold' class='ttp-checkbox'> Price below:
           </label>
-          <input type="number" min="0" value="0" name="saleThreshold" pattern="[0-9]*" class="ttp-input-number">
+          <input
+            type='number'
+            min='0'
+            value='0'
+            name='saleThreshold'
+            pattern='[0-9]*'
+            class='ttp-input-number'
+            disabled
+          >
         </div>
 
-        <div class="ttp-inline-group">
-          <label class="ttp-checkbox-label">
-            <input type="checkbox" name="trackLowStock" class="ttp-checkbox"> Low Stock Alert:
+        <div class='ttp-inline-group'>
+          <label class='ttp-checkbox-label'>
+            <input type='checkbox' name='trackLowStock' class='ttp-checkbox'> Low Stock Alert:
           </label>
-          <input type="number" min="0" value="0" name="lowStockLevel" pattern="[0-9]*" class="ttp-input-number">
+          <input
+            type='number'
+            min='0'
+            value='0'
+            name='lowStockLevel'
+            pattern='[0-9]*'
+            class='ttp-input-number'
+            disabled
+          >
         </div>
 
-        <label class="ttp-checkbox-label">
-          <input type="checkbox" name="trackNewVariant" class="ttp-checkbox"> New Variant
+        <label class='ttp-checkbox-label'>
+          <input type='checkbox' name='trackNewVariant' class='ttp-checkbox'> New Variant
         </label>
 
         <input
-          type="email"
-          name="email"
+          type='email'
+          name='email'
           required
-          value="{{ customer.email | default: '' }}"
-          placeholder="Your email"
-          class="ttp-input-email"
+          value='{{ customer.email | default: '' }}'
+          placeholder='Your email'
+          class='ttp-input-email'
         >
 
-        <input type="hidden" name="productId" value="{{ product.id }}">
-        <input type="hidden" name="variantId" value="{{ product.selected_or_first_available_variant.id }}">
-        <input type="hidden" name="userId" value="{{ customer.id | default: 'guest' }}">
+        <input type='hidden' name='productId' value='{{ product.id }}'>
+        <input type='hidden' name='variantId' value=''>
 
-        <div class="ttp-form-actions">
-          <button type="button" class="cancel-track-widget ttp-cancel-button">Cancel</button>
-          <button type="submit" class="ttp-submit-button">Track</button>
+        <input type='hidden' name='userId' value='{{ customer.id | default: 'guest' }}'>
+
+        <div class='ttp-form-actions'>
+          <button type='button' class='ttp-untrack-button' disabled>Untrack</button>
+          <button type='submit' class='ttp-submit-button' disabled>Track</button>
         </div>
       </form>
     </div>

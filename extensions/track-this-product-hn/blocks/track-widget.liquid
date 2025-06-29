@@ -1,9 +1,9 @@
-{% if customer %}
+{% if customer or request.design_mode %}
   {{ 'track-widget.css' | asset_url | stylesheet_tag }}
-  <track-product-widget data-customer-email="{{ customer.email }}">
+  <track-product-widget data-customer-email='{{ customer.email }}'>
     {% render 'track-widget' %}
   </track-product-widget>
-  <script src="{{ 'track-widget-script.js' | asset_url }}" defer></script>
+  <script src='{{ 'track-widget-script.js' | asset_url }}' defer></script>
 {% endif %}
 
 {% schema %}

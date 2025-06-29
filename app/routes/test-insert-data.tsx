@@ -1,5 +1,5 @@
-import { json } from "@remix-run/node";
-import { createOrUpdateTrackedProduct } from "../models/trackedProduct.server";
+import { json } from '@remix-run/node';
+import { createOrUpdateTrackedProduct } from '../models/trackedProduct.server';
 
 function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -8,11 +8,12 @@ function getRandomInt(min: number, max: number) {
 function generateRandomData() {
   const randomNum = getRandomInt(100000, 999999);
   return {
-    shop: "dev.myshopify.com",
+    shop: 'dev.myshopify.com',
     email: `user${randomNum}@example.com`,
     userId: `user-${randomNum}`,
-    productId: "10653414850863",
-    variantId: "51521682243887",
+    productId: '10653414850863',
+    variantId: '51521682243887',
+    sku: `SKU-${randomNum}`,
     trackInStock: true,
     trackOnSale: true,
     trackBelowThreshold: true,

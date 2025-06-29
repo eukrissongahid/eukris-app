@@ -1,8 +1,13 @@
-export function buildBackInStockEmailBody(tracker: any, description: string, inventory: number, productHandle?: string) {
+export function buildBackInStockEmailBody(
+  tracker: any,
+  description: string,
+  inventory: number,
+  productHandle?: string,
+) {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f0f4f8;">
       <h2 style="color: #22c55e; text-align: center;">📦 ${tracker.productInfo} is Back in Stock!</h2>
-      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ""}
+      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ''}
       <p style="margin-top: 16px; font-size: 16px;">
         Great news! The variant <strong>${description}</strong> is now available with <strong>${inventory}</strong> items in stock.
       </p>
@@ -13,11 +18,17 @@ export function buildBackInStockEmailBody(tracker: any, description: string, inv
   `;
 }
 
-export function buildOnSaleEmailBody(tracker: any, description: string, price: number, compareAt: number, productHandle?: string) {
+export function buildOnSaleEmailBody(
+  tracker: any,
+  description: string,
+  price: number,
+  compareAt: number,
+  productHandle?: string,
+) {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #fdf2f8;">
       <h2 style="color: #ec4899; text-align: center;">🎉 Sale Alert: ${tracker.productInfo}</h2>
-      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ""}
+      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ''}
       <p style="margin-top: 16px; font-size: 16px;">
         The variant <strong>${description}</strong> is now on sale!<br/>
         <strong>Now:</strong> ₱${price} <br/>
@@ -30,11 +41,16 @@ export function buildOnSaleEmailBody(tracker: any, description: string, price: n
   `;
 }
 
-export function buildPriceThresholdEmailBody(tracker: any, description: string, price: number, productHandle?: string) {
+export function buildPriceThresholdEmailBody(
+  tracker: any,
+  description: string,
+  price: number,
+  productHandle?: string,
+) {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #fefce8;">
       <h2 style="color: #eab308; text-align: center;">💸 Price Drop: ${tracker.productInfo}</h2>
-      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ""}
+      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ''}
       <p style="margin-top: 16px; font-size: 16px;">
         Your tracked variant <strong>${description}</strong> is now only <strong>₱${price}</strong>, which is below your alert threshold of <strong>₱${tracker.saleThreshold}</strong>.
       </p>
@@ -45,11 +61,16 @@ export function buildPriceThresholdEmailBody(tracker: any, description: string, 
   `;
 }
 
-export function buildLowStockEmailBody(tracker: any, description: string, quantity: number, productHandle?: string) {
+export function buildLowStockEmailBody(
+  tracker: any,
+  description: string,
+  quantity: number,
+  productHandle?: string,
+) {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #fef2f2;">
       <h2 style="color: #dc2626; text-align: center;">⚠️ Low Stock Warning: ${tracker.productInfo}</h2>
-      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ""}
+      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ''}
       <p style="margin-top: 16px; font-size: 16px;">
         The variant <strong>${description}</strong> is running low with only <strong>${quantity}</strong> items left in stock.
         <br/>Your alert level: <strong>${tracker.lowStockLevel}</strong>
@@ -61,11 +82,16 @@ export function buildLowStockEmailBody(tracker: any, description: string, quanti
   `;
 }
 
-export function buildNewVariantEmailBody(tracker: any, previousCount: number, currentCount: number, productHandle?: string) {
+export function buildNewVariantEmailBody(
+  tracker: any,
+  previousCount: number,
+  currentCount: number,
+  productHandle?: string,
+) {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #ecfdf5;">
       <h2 style="color: #10b981; text-align: center;">🆕 New Variant Added to ${tracker.productInfo}</h2>
-      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ""}
+      ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ''}
       <p style="margin-top: 16px; font-size: 16px;">
         A new variant has been added to the product you're tracking.<br/>
         <strong>Before:</strong> ${previousCount} variants<br/>

@@ -1,4 +1,4 @@
-import type { GraphqlClient } from "@shopify/shopify-api";
+import type { GraphqlClient } from '@shopify/shopify-api';
 
 type ProductQueryResponse = {
   body?: {
@@ -17,11 +17,12 @@ export async function getProductById(client: GraphqlClient, productId: string) {
             id
             title
             handle
-            variants(first: 100) {
+            variants(first: 250) {
               edges {
                 node {
                   id
                   title
+                  sku
                   price
                   compareAtPrice
                   inventoryQuantity

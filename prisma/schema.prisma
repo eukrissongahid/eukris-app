@@ -32,12 +32,17 @@ model Session {
 }
 
 model TrackedProduct {
-  id                      String    @id @default(cuid())
+  id                      String   @id @default(cuid())
+  
+  // Identity & Tracking
   userId                  String
-  shop                    String
   email                   String
+  shop                    String
   productId               String
   variantId               String
+  sku                     String?
+
+  // Tracking Preferences
   trackInStock            Boolean
   trackOnSale             Boolean
   trackBelowThreshold     Boolean
@@ -45,14 +50,19 @@ model TrackedProduct {
   trackLowStock           Boolean
   lowStockLevel           Int?
   trackNewVariant         Boolean
+
+  // Snapshot Data
   lastKnownPrice          Float?
-  lastInventory           Int?
   lastKnownCompareAtPrice Float?
+  lastInventory           Int?
   lastKnownVariantCount   Int?
   productInfo             String?
   variantImageUrl         String?
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
+
+  // Timestamps
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   @@unique([userId, productId, variantId])
 }
+
