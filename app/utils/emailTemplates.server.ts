@@ -82,62 +82,39 @@ export function buildLowStockEmailBody(
   `;
 }
 
-// export function buildNewVariantEmailBody(
-//   tracker: any,
-//   previousCount: number,
-//   currentCount: number,
-//   productHandle?: string,
-// ) {
-//   return `
-//     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #ecfdf5;">
-//       <h2 style="color: #10b981; text-align: center;">🆕 New Variant Added to ${tracker.productInfo}</h2>
-//       ${tracker.variantImageUrl ? `<img src="${tracker.variantImageUrl}" alt="${tracker.productInfo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 6px;" />` : ''}
-//       <p style="margin-top: 16px; font-size: 16px;">
-//         A new variant has been added to the product you're tracking.<br/>
-//         <strong>Before:</strong> ${previousCount} variants<br/>
-//         <strong>Now:</strong> ${currentCount} variants
-//       </p>
-//       <div style="text-align: center; margin-top: 20px;">
-//         <a href="https://${tracker.shop}/products/${productHandle}?variant=${tracker.variantId}" style="background-color: #10b981; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none;">View Product</a>
-//       </div>
-//     </div>
-//   `;
-// }
-
 export function buildNewVariantEmailBody(
   tracker: any,
   previousCount: number,
   currentCount: number,
   productHandle?: string,
+  productTitle?: string,
   newVariants: any[] = [],
 ) {
   const newVariantsHTML = newVariants
-    .map((v) => {
-      const options = [v.option1, v.option2, v.option3]
-        .filter(Boolean)
-        .join(' / ');
+    .map((v, i) => {
+      const variantDisplay =
+        v.title || [v.option1, v.option2, v.option3].filter(Boolean).join(' / ');
       return `
-        <div style="margin-bottom: 12px; padding: 12px; background: #f0fdfa; border-radius: 6px;">
-          <strong>${v.title}</strong><br/>
-          <small>${options}</small>
-        </div>
+        <p style="margin: 8px 0; font-size: 15px;">
+          <strong>${i + 1}.</strong> ${variantDisplay}
+        </p>
       `;
     })
     .join('');
 
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #ecfdf5;">
-      <h2 style="color: #10b981; text-align: center;">🆕 New Variant(s) Added to ${tracker.productInfo}</h2>
+      <h2 style="color: #10b981; text-align: center;">🆕 New Variant(s) Added to ${productTitle}</h2>
 
-      <p style="margin-top: 16px; font-size: 16px;">
+      <p style="font-size: 16px; margin-top: 16px;">
         <strong>Before:</strong> ${previousCount} variants<br/>
         <strong>Now:</strong> ${currentCount} variants
       </p>
 
       ${newVariantsHTML}
 
-      <div style="text-align: center; margin-top: 20px;">
-        <a href="https://${tracker.shop}/products/${productHandle}?variant=${tracker.variantId}" style="background-color: #10b981; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none;">View Product</a>
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="https://${tracker.shop}/products/${productHandle}" style="background-color: #10b981; color: white; padding: 10px 20px; border-radius: 4px; text-decoration: none;">View Product</a>
       </div>
     </div>
   `;

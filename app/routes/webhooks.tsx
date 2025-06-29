@@ -57,11 +57,6 @@ async function handleProductsUpdate(payload: any) {
     await deleteTrackedByVariantIds(removedVariantIds);
   }
 
-  // const oldVariantIds = new Set(existingVariantIds);
-  // console.log('🆕 oldVariantIds:', oldVariantIds);
-  // const newVariants = variants.filter((v: any) => !oldVariantIds.has(String(v.id)));
-  // console.log('🆕 New Variants:', newVariants);
-
   let product;
   try {
     const graphqlClient = await getAdminGraphqlClient(payload.shop);
@@ -74,17 +69,12 @@ async function handleProductsUpdate(payload: any) {
   const groupedTrackers = await getGroupedTrackNewVariantTrackers(String(productId));
   const grouped = groupNewVariantTrackers(groupedTrackers);
 
-  // Loop through each group (email + product)
   for (const [, group] of grouped) {
     const previousCount = group.lastKnown;
 
     if (currentVariantCount > previousCount) {
-      // Calculate the number of *new* variants
       const newCount = currentVariantCount - previousCount;
-
-      // Get the last X variants from payload (they are ordered, latest last)
       const newVariants = variants.slice(-newCount);
-      console.log('🆕 New Variants:', newVariants);
 
       await sendEmail({
         to: group.email,
@@ -94,7 +84,8 @@ async function handleProductsUpdate(payload: any) {
           previousCount,
           currentVariantCount,
           product.handle,
-          newVariants, // ✅ only show new variants
+          product.title,
+          newVariants,
         ),
       });
 
